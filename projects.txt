@@ -43,5 +43,5 @@ https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/myt
 https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/tapestry-sesame/source-archive.zip
 https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/gwt-plugindetect/source-archive.zip
 https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/javasummerframework/source-archive.zip
-https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/affinity_propagation_java/source-archive.zip
-https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/gfsfa/source-archive.zip
+# https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/affinity_propagation_java/source-archive.zip
+# https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/gfsfa/source-archive.zip
