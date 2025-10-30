@@ -257,14 +257,14 @@ def setup_args():
 
 if __name__ == '__main__':
 
-  # args = setup_args()
+  args = setup_args()
 
   #Fix seeds
-  # np.random.seed(args.seed)
-  # os.environ['PYTHONHASHSEED']=str(args.seed)
+  np.random.seed(args.seed)
+  os.environ['PYTHONHASHSEED']=str(args.seed)
 
-  # input_data_path = os.path.join(args.base_dir, args.proj_name)
-  input_data_path = os.path.join("rule_classifier_data/train", "sol-agent-platform")
+  input_data_path = os.path.join(args.base_dir, args.proj_name)
+  # input_data_path = os.path.join("rule_classifier_data/train", "sol-agent-platform")
   os.makedirs(input_data_path, exist_ok=True)
 
   files = [os.path.join(dp, f) \
