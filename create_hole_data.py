@@ -2,7 +2,7 @@ import numpy as np
 import os
 import argparse
 import pickle
-import javac_parser
+# import javac_parser
 import shutil
 
 
