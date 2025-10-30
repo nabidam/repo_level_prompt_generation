@@ -1,2 +1,3 @@
-gcode_data/*
+gcode-data/*
 gcode_data_org/*
+rule_classifier_data/*
