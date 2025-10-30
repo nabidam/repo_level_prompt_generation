@@ -1,7 +1,9 @@
 import os
 import pickle
 import argparse
-from tree_sitter import Language, Parser
+from typing import Dict
+from tree_sitter import Language, Parser, Query, QueryCursor
+import tree_sitter_java as ts_java
 from utils import *
 import copy
 
@@ -9,12 +11,9 @@ import copy
 Obtain the parse tree for individual files and collate data at repo-level for rules.
 """
 
-Language.build_library('build/my-languages.so', ['tree-sitter-java']) 
+JAVA_LANGUAGE = Language(ts_java.language()) 
 
-JAVA_LANGUAGE = Language('build/my-languages.so', 'java') 
-
-parser = Parser()
-parser.set_language(JAVA_LANGUAGE)
+parser = Parser(JAVA_LANGUAGE)
 
 
 def get_sibling_files(file, all_files):
@@ -83,60 +82,63 @@ def get_tree(filename):
   root_node = tree.root_node
   return root_node
 
-def parse_captures(captures, filename):
+def parse_captures(captures: Dict, filename):
   text_spans = []
-  for capture in captures:
-    #capture[1] = property_name
-    start, end = capture[0].start_point, capture[0].end_point
-    #text = get_string(filename, start, end)
-    text_spans.append((start, end))
+  for key in captures.keys():
+    for capture in captures[key]:
+      #capture[1] = property_name
+      start, end = capture.start_point, capture.end_point
+      #text = get_string(filename, start, end)
+      text_spans.append((start, end))
   return text_spans
 
 def get_query(attribute_type):
 
   if attribute_type == 'class_name':
-    query = JAVA_LANGUAGE.query("""(class_declaration
+    query = Query(JAVA_LANGUAGE, """(class_declaration
                                   name: (identifier) @class_name)""")
 
   if attribute_type == 'class_body':
-    query = JAVA_LANGUAGE.query("""(class_declaration
+    query = Query(JAVA_LANGUAGE, """(class_declaration
                                   body: (class_body) @class_body)""")
 
   if attribute_type == 'parent_class_name':
-    query = JAVA_LANGUAGE.query("""(class_declaration
+    query = Query(JAVA_LANGUAGE, """(class_declaration
                                   name: (identifier)
                                   superclass: (superclass (type_identifier) @superclass_name))""")
 
   if attribute_type == 'all_method_name':
-    query = JAVA_LANGUAGE.query("""(method_declaration
+    query = Query(JAVA_LANGUAGE, """(method_declaration
                                     name: (identifier) @all_method_name)""")
 
   if attribute_type == 'all_method_body':
-    query = JAVA_LANGUAGE.query("""(method_declaration body: (block) @all_method_block)""")
+    query = Query(JAVA_LANGUAGE, """(method_declaration body: (block) @all_method_block)""")
 
   if attribute_type == 'import_statement':
-    query = JAVA_LANGUAGE.query("""(import_declaration (
+    query = Query(JAVA_LANGUAGE, """(import_declaration (
                                    scoped_identifier
                                    name: (identifier)) @import_statement)""")
 
   if attribute_type == 'all_field_declaration':
-    query = JAVA_LANGUAGE.query("""(field_declaration) @field_declaration""")
+    query = Query(JAVA_LANGUAGE, """(field_declaration) @field_declaration""")
 
   if attribute_type == 'all_string_literal':
-    query = JAVA_LANGUAGE.query("""(string_literal) @string_literal""")
+    query = Query(JAVA_LANGUAGE, """(string_literal) @string_literal""")
 
   if attribute_type == 'all_identifier':
-    query = JAVA_LANGUAGE.query("""(identifier) @identifier""")
+    query = Query(JAVA_LANGUAGE, """(identifier) @identifier""")
 
   if attribute_type == 'all_type_identifier':
-    query = JAVA_LANGUAGE.query("""(type_identifier) @type_identifier""")
+    query = Query(JAVA_LANGUAGE, """(type_identifier) @type_identifier""")
 
   return query
 
 def get_attribute(root_node, filename, attribute_type):
 
   query = get_query(attribute_type)
-  captures = query.captures(root_node)
+  query_cursor = QueryCursor(query)
+  captures = query_cursor.captures(root_node)
+  # captures = query.captures(root_node)
   if captures:
     attributes = parse_captures(captures, filename)
   else:
@@ -155,8 +157,9 @@ def get_import_path(import_stat, file):
       index_pos = len(file_path_parts) - file_path_parts[::-1].index(import_path_part) - 1
       absolute_import_path = file_path_parts[:index_pos] + import_path_parts
     except ValueError as e:
-      print('')
-  #print(absolute_import_path)
+      # print(str(e))
+      pass
+  # print(f"{absolute_import_path=}")
   if absolute_import_path:
     import_path = '/'.join(absolute_import_path)
     import_path = import_path + '.java'
@@ -254,13 +257,14 @@ def setup_args():
 
 if __name__ == '__main__':
 
-  args = setup_args()
+  # args = setup_args()
 
   #Fix seeds
-  np.random.seed(args.seed)
-  os.environ['PYTHONHASHSEED']=str(args.seed)
+  # np.random.seed(args.seed)
+  # os.environ['PYTHONHASHSEED']=str(args.seed)
 
-  input_data_path = os.path.join(args.base_dir, args.proj_name)
+  # input_data_path = os.path.join(args.base_dir, args.proj_name)
+  input_data_path = os.path.join("rule_classifier_data/train", "sol-agent-platform")
   os.makedirs(input_data_path, exist_ok=True)
 
   files = [os.path.join(dp, f) \
